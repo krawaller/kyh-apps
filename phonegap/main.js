@@ -79,8 +79,10 @@ function fail(msg) {
 }
 
 function show_pic() {
+	console.log('hmmm');
     navigator.camera.getPicture(dump_pic, fail, {
         quality : 50,
+		sourceType: navigator.camera.PictureSourceType.PHOTOLIBRARY,
 		destinationType: navigator.camera.DestinationType.DATA_URL
     });
 }
