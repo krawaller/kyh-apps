@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title></title>
+  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+	<meta charset="utf-8">
+
+  </head>
+  <body>
+  	<form id="urlform">
+  		<input type="text" hintText="heja" id="urlfield" />
+  		<input type="submit" value="Kör" />
+  	</form>
+  	
+  	<script>
+  		var url;
+  		if(location.href.indexOf('reset') === -1 && (url = localStorage.phonegapurl)){
+  			openInWebView(url)
+  		}
+  		
+  		function openInWebView(url){
+            var anchor = document.createElement('a');
+            anchor.setAttribute('href', url);
+            anchor.setAttribute('target', '_self');
+            
+            var dispatch = document.createEvent('HTMLEvents')
+            dispatch.initEvent('click', true, true);
+            
+            anchor.dispatchEvent(dispatch);
+            //alert('dispatched!');
+        }
+        
+        document.getElementById('urlform').addEventListener('submit', function(e){
+        	var value = document.getElementById('urlfield').value;
+        	localStorage.phonegapurl = value;
+        	openInWebView(value);
+        	//alert(value);
+        	e.preventDefault();
+        }, false);
+        
+        //openInWebView('http://dev.krawaller.se/phonegap.html');
+  	</script>
+  </body>
+</html>
