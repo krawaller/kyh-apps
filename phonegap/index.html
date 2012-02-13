@@ -4,7 +4,7 @@
 		<meta name="viewport" content="width=device-width; user-scalable=no" />
 		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
 		<title>PhoneGap</title>
-		<link rel="stylesheet" href="master.css" type="text/css" media="screen" title="no title">
+		<script src="zepto.js"></script>
 		<script>
 			var scriptEl = document.createElement('script');
 			scriptEl.src = 'phonegap-' + (navigator.userAgent.match(/Android/i) ? 'android-' : '') + '1.4.1.js';
@@ -12,194 +12,85 @@
 			var s = document.getElementsByTagName('script')[0];
 			s.parentNode.insertBefore(scriptEl, s);
 		</script>
-		<!--script src="http://debug.phonegap.com/target/target-script-min.js#changeme"></script-->
+		<script src="http://debug.phonegap.com/target/target-script-min.js#jacob"></script>
+	
 		
+		<style>
+			body {
+		    	font-family: Helvetica;
+				margin: 0;
+				padding: 0;
+		    }
 		
-		<script>
-			var deviceInfo = function() {
-			    document.getElementById("platform").innerHTML = device.platform;
-			    document.getElementById("version").innerHTML = device.version;
-			    document.getElementById("uuid").innerHTML = device.uuid;
-			    document.getElementById("name").innerHTML = device.name;
-			    document.getElementById("width").innerHTML = screen.width;
-			    document.getElementById("height").innerHTML = screen.height;
-			    document.getElementById("colorDepth").innerHTML = screen.colorDepth;
-
-
-			};
-
-			var getLocation = function() {
-			    var suc = function(p) {
-			        alert(p.coords.latitude + " " + p.coords.longitude);
-			    };
-			    var locFail = function() {
-			    };
-			    navigator.geolocation.getCurrentPosition(suc, locFail);
-			};
-
-			var beep = function() {
-			    navigator.notification.beep(2);
-			};
-
-			var vibrate = function() {
-			    navigator.notification.vibrate(0);
-			};
-
-			function roundNumber(num) {
-			    var dec = 3;
-			    var result = Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
-			    return result;
+			#debug {
+				position: absolute;
+				bottom: 0px;
+				height: 200px;
+				border-top: 1px solid #ccc;
+				width: 100%;
 			}
-
-			var accelerationWatch = null;
-
-			function updateAcceleration(a) {
-			    document.getElementById('x').innerHTML = roundNumber(a.x);
-			    document.getElementById('y').innerHTML = roundNumber(a.y);
-			    document.getElementById('z').innerHTML = roundNumber(a.z);
+			#debug-list {
+				width: 100%;
+				list-style: none;
+				margin: 0;
+				padding: 0;
+				overflow: scroll;
+				-webkit-overflow-scrolling: touch;
 			}
-
-			var toggleAccel = function() {
-			    if (accelerationWatch !== null) {
-			        navigator.accelerometer.clearWatch(accelerationWatch);
-			        updateAcceleration({
-			            x : "",
-			            y : "",
-			            z : ""
-			        });
-			        accelerationWatch = null;
-			    } else {
-			        var options = {};
-			        options.frequency = 1000;
-			        accelerationWatch = navigator.accelerometer.watchAcceleration(
-			                updateAcceleration, function(ex) {
-			                    alert("accel fail (" + ex.name + ": " + ex.message + ")");
-			                }, options);
-			    }
-			};
-
-			var preventBehavior = function(e) {
-			    e.preventDefault();
-			};
-
-			function dump_pic(data) {
-			    var viewport = document.getElementById('viewport');
-			    console.log(data);
-			    viewport.style.display = "";
-			    viewport.style.position = "absolute";
-			    viewport.style.top = "10px";
-			    viewport.style.left = "10px";
-			    document.getElementById("test_img").src = "data:image/jpeg;base64," + data;
+			#debug li {
+				padding: 10px;
+				border-bottom: 1px solid #eee;
+				/*height: 40px;
+				line-height: 40px;*/
 			}
-
-			function fail(msg) {
-			    alert(msg);
-			}
-
-			function show_pic() {
-				console.log('hmmm');
-			    navigator.camera.getPicture(dump_pic, fail, {
-			        quality : 50,
-					sourceType: navigator.camera.PictureSourceType.PHOTOLIBRARY,
-					destinationType: navigator.camera.DestinationType.DATA_URL
-			    });
-			}
-
-			function close() {
-			    var viewport = document.getElementById('viewport');
-			    viewport.style.position = "relative";
-			    viewport.style.display = "none";
-			}
-
-			function contacts_success(contacts) {
-			    alert(contacts.length
-			            + ' contacts returned.'
-			            + (contacts[2] && contacts[2].name ? (' Third contact is ' + contacts[2].name.formatted)
-			                    : ''));
-			}
-
-			function get_contacts() {
-			    var obj = new ContactFindOptions();
-			    obj.filter = "";
-			    obj.multiple = true;
-			    navigator.contacts.find(
-			            [ "displayName", "name" ], contacts_success,
-			            fail, obj);
-			}
-
-			function check_network() {
-			    var networkState = navigator.network.connection.type;
-
-			    var states = {};
-			    states[Connection.UNKNOWN]  = 'Unknown connection';
-			    states[Connection.ETHERNET] = 'Ethernet connection';
-			    states[Connection.WIFI]     = 'WiFi connection';
-			    states[Connection.CELL_2G]  = 'Cell 2G connection';
-			    states[Connection.CELL_3G]  = 'Cell 3G connection';
-			    states[Connection.CELL_4G]  = 'Cell 4G connection';
-			    states[Connection.NONE]     = 'No network connection';
-
-			    confirm('Connection type:\n ' + states[networkState]);
-			}
-
-			var watchID = null;
-
-			function updateHeading(h) {
-			    document.getElementById('h').innerHTML = h.magneticHeading;
-			}
-
-			function toggleCompass() {
-			    if (watchID !== null) {
-			        navigator.compass.clearWatch(watchID);
-			        watchID = null;
-			        updateHeading({ magneticHeading : "Off"});
-			    } else {        
-			        var options = { frequency: 1000 };
-			        watchID = navigator.compass.watchHeading(updateHeading, function(e) {
-			            alert('Compass Error: ' + e.code);
-			        }, options);
-			    }
-			}
-
-			function init() {
-			    // the next line makes it impossible to see Contacts on the HTC Evo since it
-			    // doesn't have a scroll button
-			    // document.addEventListener("touchmove", preventBehavior, false);
-			    document.addEventListener("deviceready", deviceInfo, true);
-			}
-			
-		</script>
-
+		</style>
 	</head>
-	<body onload="init();" id="stage" class="theme">
-		<h1>Welcome to PhoneGap!</h1>
-		<div id="info">
-				<h4>Platform: <span id="platform"> &nbsp;</span>,	 Version: <span id="version">&nbsp;</span></h4>
-				<h4>UUID: <span id="uuid"> &nbsp;</span>,	 Name: <span id="name">&nbsp;</span></h4>
-				<h4>Width: <span id="width"> &nbsp;</span>,	 Height: <span id="height">&nbsp;
-									 </span>, Color Depth: <span id="colorDepth"></span></h4>
-		 </div>
-		<dl id="accel-data">
-			<dt>X:</dt><dd id="x">&nbsp;</dd>
-			<dt>Y:</dt><dd id="y">&nbsp;</dd>
-			<dt>Z:</dt><dd id="z">&nbsp;</dd>
-		</dl>
-		<a href="http://dev.krawaller.se/phonegapset.html?reset" class="btn large">Reset Phonegap url</a>
-		<a href="#" class="btn large" onclick="toggleAccel();">Toggle Accelerometer</a>
-		<a href="#" class="btn large" onclick="getLocation();">Get Location</a>
-		<a href="tel:411" class="btn large">Call 411</a>
-		<a href="#" class="btn large" onclick="vibrate();">Vibrate</a>
-		<a href="#" class="btn large" onclick="show_pic();">Get a Picture</a>
-		<a href="#" class="btn large" onclick="get_contacts();return false;">Get Phone's Contacts</a>
-		<a href="#" class="btn large" onclick="check_network();return false;">Check Network</a>
-		<dl>
-			<dt>Compass Heading:</dt><dd id="h">Off</dd>
-		</dl>
-		<a href="#" class="btn large" onclick="toggleCompass();return false;">Toggle Compass</a>
-		<div id="viewport" class="viewport" style="display: none;">
-			<img style="width:60px;height:60px" id="test_img" src="" />
+	<body>
+		<a href="index.html">index.html</a>
+		<ul id="contacts">
+			
+		</ul>
+		
+		<div id="debug">
+			<ul id="debug-list">
+				<li>This is the fake console...</li>
+			</ul>
 		</div>
+		
 		<a href="#" style="position: absolute; display: inline-block; padding: 4px 8px; background-color: #f00; color: #fff; top: 0px; right: 0px; font-weight: bold; text-decoration: none; border: 1px solid #c00; -webkit-box-shadow: 0px 0px 8px #000;" onclick="location.reload()">Reload</a>
-		<!--script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script-->
+		<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
+		<script>
+			// Wait for PhoneGap to load
+		    document.addEventListener("deviceready", onDeviceReady, false);
+			
+			function initFakeConsole(){
+				console = window.console = {
+					log: function(){
+						var args = Array.prototype.slice.call(arguments);
+						$('<li/>').html(args.map(function(o){
+							try {
+								return JSON.stringify(o);
+							} catch(e){
+								return o;
+							}
+						}).join(', ')).prependTo('#debug-list');
+					}
+				};
+			}
+			initFakeConsole();
+			
+			
+		    function onDeviceReady() {
+				initFakeConsole();
+		        getContacts();
+		    }
+		
+			// Fill in the blanks
+			function getContacts() {
+		    	console.log('Hämta kontakter här...');
+			}
+
+
+		</script>
 	</body>
 </html>
