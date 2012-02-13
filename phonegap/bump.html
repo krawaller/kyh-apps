@@ -1,0 +1,229 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width; user-scalable=no" />
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<title>PhoneGap</title>
+		<script src="zepto.js"></script>
+		<script>
+			var scriptEl = document.createElement('script');
+			scriptEl.src = 'phonegap-' + (navigator.userAgent.match(/Android/i) ? 'android-' : '') + '1.4.1.js';
+			
+			var s = document.getElementsByTagName('script')[0];
+			s.parentNode.insertBefore(scriptEl, s);
+		</script>
+		<script src="http://debug.phonegap.com/target/target-script-min.js#jacob"></script>
+	
+		
+		<style>
+			body {
+		    	font-family: Helvetica;
+				margin: 0;
+				padding: 0;
+		    }
+		
+			#debug {
+				position: absolute;
+				bottom: 0px;
+				height: 200px;
+				border-top: 1px solid #ccc;
+				width: 100%;
+			}
+			#debug-list {
+				width: 100%;
+				list-style: none;
+				margin: 0;
+				padding: 0;
+				overflow: scroll;
+				-webkit-overflow-scrolling: touch;
+			}
+			#debug li {
+				padding: 10px;
+				border-bottom: 1px solid #eee;
+				/*height: 40px;
+				line-height: 40px;*/
+			}
+			.active {
+				background-color: #0a0;
+			}
+		</style>
+	</head>
+	<body>
+		<a href="index.html">index.html</a>
+		<ul id="contacts">
+		</ul>
+		
+		<div id="debug">
+			<ul id="debug-list">
+				<li>This is the fake console...</li>
+			</ul>
+		</div>
+		
+		<a href="#" style="position: absolute; display: inline-block; padding: 4px 8px; background-color: #f00; color: #fff; top: 0px; right: 0px; font-weight: bold; text-decoration: none; border: 1px solid #c00; -webkit-box-shadow: 0px 0px 8px #000;" onclick="location.reload()">Reload</a>
+		<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
+		<script>
+			// Wait for PhoneGap to load
+		    document.addEventListener("deviceready", onDeviceReady, false);
+			
+			function initFakeConsole(){
+				console = window.console = {
+					log: function(){
+						var args = Array.prototype.slice.call(arguments);
+						$('<li/>').html(args.map(function(o){
+							try {
+								return JSON.stringify(o);
+							} catch(e){
+								return o;
+							}
+						}).join(', ')).prependTo('#debug-list');
+					}
+				};
+			}
+			initFakeConsole();
+			
+			var bumpedAt;
+		    function onDeviceReady() {
+				initFakeConsole();
+				console.log('ready!');
+		        getContacts();
+				//bindPickContacts();
+		
+				var position;
+				navigator.geolocation.getCurrentPosition(function(_position) {
+					position = _position;
+				    /*alert(
+			 'Latitude: '          + position.coords.latitude          + '\n' +
+	         'Longitude: '         + position.coords.longitude         + '\n' +
+	         'Altitude: '          + position.coords.altitude          + '\n' +
+	         'Accuracy: '          + position.coords.accuracy          + '\n' +
+	         'Altitude Accuracy: ' + position.coords.altitudeAccuracy  + '\n' +
+	         'Heading: '           + position.coords.heading           + '\n' +
+	         'Speed: '             + position.coords.speed             + '\n' +
+	         'Timestamp: '         + new Date(position.timestamp)      + '\n');*/
+				}, function (error) {
+				    alert('code: '    + error.code    + '\n' +
+				          'message: ' + error.message + '\n');
+				});
+				
+	
+				var accelerationThreshold = 0.2;
+				var lastBumpedContact;
+				
+				var lastAcceleration = {
+					x: 0,
+					y: 0,
+					z: 0
+				};
+				var watchID = navigator.accelerometer.watchAcceleration(function(acceleration) {
+					if(acceleration.x === 0 ||
+						Math.abs(acceleration.x - lastAcceleration.x) >= accelerationThreshold ||
+						Math.abs(acceleration.y - lastAcceleration.y) >= accelerationThreshold ||
+						Math.abs(acceleration.z - lastAcceleration.z) >= accelerationThreshold
+					){
+						var activeElement = $('#contacts li.active');
+						if(activeElement.length){
+							//alert('elemnt!')
+							var bumpedContact = activeElement.html();
+							
+							if(bumpedContact !== lastBumpedContact){
+								PUBNUB.publish({             // SEND A MESSAGE.
+					                channel : "hello_world",
+					                message : bumpedContact
+					            });
+							}
+											
+							lastBumpedContact = bumpedContact;
+						} else {
+							bumpedAt = Date.now();
+						}
+					}
+					
+				    /*alert('Acceleration X: ' + Math.abs(acceleration.x - lastAcceleration.x) + '\n' +
+				          'Acceleration Y: ' + Math.abs(acceleration.y - lastAcceleration.y) + '\n' +
+				          'Acceleration Z: ' + Math.abs(acceleration.z - lastAcceleration.z) + '\n' +
+				          'Timestamp: '      + acceleration.timestamp + '\n');*/
+					lastAcceleration = acceleration;
+				}, 	function() {
+			    	alert('onError!');
+				}, { frequency: 1000 });
+		    }
+		
+			function bindPickContacts(){
+				//alert('binding')
+				$('#contacts li').bind('tap', function(e){
+					$('#contacts li').removeClass('active');
+					$(this).addClass('active');
+				});
+			}
+		
+			// Fill in the blanks
+			function getContacts() {
+			    // find all contacts with 'Bob' in any name field
+		        var options = new ContactFindOptions();
+				options.multiple = true;
+		        var fields = ["displayName", "name"];
+		        navigator.contacts.find(fields, onSuccess, onError, options);
+		    }
+
+		    // onSuccess: Get a snapshot of the current contacts
+		    //
+		    function onSuccess(contacts) {
+		        for (var i=0; i<contacts.length; i++) {
+					$('#contacts').append('<li>' + contacts[i].name.formatted + '</li>')
+		        }
+				bindPickContacts()
+		    }
+
+		    // onError: Failed to get the contacts
+		    //
+		    function onError(contactError) {
+		        alert('onError!');
+		    }
+			
+			function handlePubnubMessage(msg){
+				if(Date.now() - bumpedAt < 10000){
+					$('#contacts').append('<li>' + msg + '</li>')
+				}
+			}
+
+			
+			
+
+		</script>
+		<div pub-key="f205a805-81ed-4aca-af18-a26cea6ce501" sub-key="f85455fa-a469-11df-adb5-c5845d0fd796" ssl="off" origin="pubsub.pubnub.com" id="pubnub"></div>
+		<script src="http://cdn.pubnub.com/pubnub-3.1.min.js"></script>
+		<script>(function(){
+
+		    // LISTEN FOR MESSAGES
+		    PUBNUB.subscribe({
+		        channel    : "hello_world",      // CONNECT TO THIS CHANNEL.
+
+		        restore    : false,              // STAY CONNECTED, EVEN WHEN BROWSER IS CLOSED
+		                                         // OR WHEN PAGE CHANGES.
+
+		        callback   : handlePubnubMessage,
+
+		        disconnect : function() {        // LOST CONNECTION.
+		            console.log(
+		                "Connection Lost." +
+		                "Will auto-reconnect when Online."
+		            )
+		        },
+
+		        reconnect  : function() {        // CONNECTION RESTORED.
+		            console.log("And we're Back!")
+		        },
+
+		        connect    : function() {        // CONNECTION ESTABLISHED.
+
+		            /*PUBNUB.publish({             // SEND A MESSAGE.
+		                channel : "hello_world",
+		                message : "Hi from PubNub."
+		            })*/
+
+		        }
+		    })
+
+		})();</script>
+	</body>
+</html>
