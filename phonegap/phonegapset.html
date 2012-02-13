@@ -8,6 +8,7 @@
 
   </head>
   <body>
+	<p>Ladda ner PhoneGap-exemplet från <a href="https://github.com/krawaller/kyh-apps/zipball/master">https://github.com/krawaller/kyh-apps/zipball/master</a>. Lägg filerna i en katalog och starta upp en webbserver som är åtkomlig för din telefon, eller lägg upp dem på en server.</p>
   	<form id="urlform">
   		<input type="text" hintText="heja" id="urlfield" />
   		<input type="submit" value="Kör" />
@@ -28,14 +29,12 @@
             dispatch.initEvent('click', true, true);
             
             anchor.dispatchEvent(dispatch);
-            //alert('dispatched!');
         }
         
         document.getElementById('urlform').addEventListener('submit', function(e){
         	var value = document.getElementById('urlfield').value;
         	localStorage.phonegapurl = value;
         	openInWebView(value);
-        	//alert(value);
         	e.preventDefault();
         }, false);
         
