@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width; user-scalable=no" />
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<title>PhoneGap</title>
+		<script src="zepto.js"></script>
+		<script>
+			var scriptEl = document.createElement('script');
+			scriptEl.src = 'phonegap-' + (navigator.userAgent.match(/Android/i) ? 'android-' : '') + '1.4.1.js';
+			
+			var s = document.getElementsByTagName('script')[0];
+			s.parentNode.insertBefore(scriptEl, s);
+		</script>
+		<script src="http://debug.phonegap.com/target/target-script-min.js#changeme"></script>
+		
+
+		<script>
+			// Wait for PhoneGap to load
+		    document.addEventListener("deviceready", onDeviceReady, false);
+
+
+		    function onDeviceReady() {
+		        
+		    }
+
+		</script>
+		
+		<style>
+			body {
+		    	font-family: Helvetica;
+		    }
+		</style>
+	</head>
+	<body>
+		<a href="index.html">index.html</a>
+		<ul id="contacts">
+			
+		</ul>
+		<a href="#" style="position: absolute; display: inline-block; padding: 4px 8px; background-color: #f00; color: #fff; top: 0px; right: 0px; font-weight: bold; text-decoration: none; border: 1px solid #c00; -webkit-box-shadow: 0px 0px 8px #000;" onclick="location.reload()">Reload</a>
+		<!--script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script-->
+	</body>
+</html>
