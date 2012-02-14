@@ -1,4 +1,6 @@
-var tabGroup = Ti.UI.createTabGroup(),
+var tabGroup = Ti.UI.createTabGroup({
+	backgroundColor: '#fff'
+});
 	win = Ti.UI.createWindow({
 		title: 'Contacts'
 	}),
@@ -7,7 +9,10 @@ var tabGroup = Ti.UI.createTabGroup(),
 		window: win
 	});
 	
-var data = [];
+	
+var data = [{
+	title: 'Första raden'
+}];
 data.push({
 	title: 'Exempelrad'
 });

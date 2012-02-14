@@ -55,7 +55,7 @@ function initRemote(){
 
 function init(){
 	initRemote();
-	setInterval(initRemote, K.is.android ? 10000 : 10000);
+	setInterval(initRemote, K.is.android ? 1000 : 1000);
 }
 
 if(!K.get('url')){
