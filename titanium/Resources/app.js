@@ -1,4 +1,3 @@
-//Ti.include('/kranium/lib/kranium.js');
 var K = require("kranium/init").init({
 	queryable: true
 });
@@ -8,6 +7,10 @@ Ti.include('/moment.min.js');
 
 Ti.Geolocation.purpose = 'Show stuff on map';
 Ti.UI.setBackgroundColor('#fff');
+
+
+// Below this line is only the automatic updater.
+// If you run this app locally, you should remove this
 
 Ti.Gesture.addEventListener('shake', function(e) {
 	initRemote();
@@ -33,13 +36,19 @@ function initRemote(){
 			
 			var file = Ti.Filesystem.getFile(Ti.Filesystem.tempDirectory, 'remote.js');
 			file.write(data);
-			try {
+			lastData = data;
+			
+			if(K.is.android){
+				try {
+					Ti.include(file.nativePath);
+				} catch(e){
+					K.alert(e.toString(), 'Error');
+					Ti.API.error(e);
+				}
+			} else {
 				Ti.include(file.nativePath);
-			} catch(e){
-				alert(JSON.stringify(e));
 			}
 			
-			lastData = data;
 		}
 	});
 }
