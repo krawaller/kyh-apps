@@ -12,8 +12,6 @@ data.push({
 	title: 'Exempelrad'
 });
 	
-//alertz(1)
-	
 var	contactsTable = Ti.UI.createTableView({
 	data: data
 });
